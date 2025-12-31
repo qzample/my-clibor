@@ -9,6 +9,13 @@ import tkinter as tk
 from tkinter import ttk
 from core.database import DataBase
 from core.clipboard import ClipBorad
+import clipboard_monitor
+import logging
+from collections import deque
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class MyClibor(object):
     '''
@@ -21,6 +28,7 @@ class MyClibor(object):
     __limit = 20
 
     def __init__(self):
+        self.__widget_list = deque()
         self.__db = DataBase()
         self.__clipboard = ClipBorad()
 
@@ -47,10 +55,9 @@ class MyClibor(object):
             for item in self.__clipboard_data:
                 self.__db.write_clipboard_data(item)
             return
-        if len(clipboard_data) < self.__limit:
-            self.__clipboard_data = clipboard_data
-        else:
-            self.__clipboard_data = clipboard_data[0:20]
+        self.__clipboard_data = deque(clipboard_data)
+        while len(self.__clipboard_data) > 20:
+            self.__clipboard_data.popleft()
 
     def __init_window(self):
         '''
@@ -74,24 +81,48 @@ class MyClibor(object):
                 label = tk.Label(root, text=value, bg="#3BB5DD")
             else:
                 label = tk.Label(root, text=value, bg="#ADD8E6")
-            label.bind('<Enter>', self.on_enter_label)
+            label.bind('<Enter>', self.__on_enter_label)
             label.bind('<Leave>', lambda event,
-                       index=i: self.on_leave_label(event, index))
-            label.grid(column=0, row=i, sticky=tk.EW, ipadx=5, ipady=5)
+                       index=i: self.__on_leave_label(event, index))
+            label.grid(column=0, row=i, sticky=tk.NSEW, padx=0, pady=0, ipadx=5, ipady=5)
+            self.__widget_list.append(label)
         self.__root = root
 
-    def on_enter_label(self, event):
+    def __on_enter_label(self, event):
         event.widget['bg'] = "#074155"
 
-    def on_leave_label(self, event, index):
+    def __on_leave_label(self, event, index):
         if index % 2:
             event.widget['bg'] = '#3BB5DD'
         else:
             event.widget['bg'] = '#ADD8E6'
+    
+    def __on_text(self, value):
+        logging.info(value)
+        self.__db.write_clipboard_data(value)
+        self.__clipboard_data.append(value)
+        index = len(self.__clipboard_data) - 1
+        if index % 2 != 0:
+            label = tk.Label(self.__root, text=value, bg="#3BB5DD")
+        else:
+            label = tk.Label(self.__root, text=value, bg="#ADD8E6")
+        label.bind('<Enter>', self.__on_enter_label)
+        label.bind('<Leave>', lambda event,
+                    index=index: self.__on_leave_label(event, index))
+        label.grid(column=0, row=index, sticky=tk.NSEW, padx=0, pady=0, ipadx=5, ipady=5)
+        if index > self.__limit - 1:
+            self.__clipboard_data.popleft()
+            label = self.__widget_list.popleft()
+            label.destroy()
+
+
+    def __start_listen_clipboard(self):
+        clipboard_monitor.on_text(self.__on_text)
 
     def run(self):
         try:
             from ctypes import windll
             windll.shcore.SetProcessDpiAwareness(1)
         finally:
+            self.__start_listen_clipboard()
             self.__root.mainloop()

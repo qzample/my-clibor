@@ -9,7 +9,7 @@ import sqlite3
 
 class DataBase(object):
     def __init__(self):
-        conn = sqlite3.connect('my_clibor.db')
+        conn = sqlite3.connect('my_clibor.db', check_same_thread=False)
         self.__conn = conn
         self.__init_table()
     
@@ -19,7 +19,7 @@ class DataBase(object):
         values = cursor.fetchall()
         self.__conn.commit()
         cursor.close()
-        return [x[1] for x in values]
+        return [x[1].decode('utf-8') for x in values]
     
     def write_clipboard_data(self, value):
         cursor = self.__conn.cursor()
