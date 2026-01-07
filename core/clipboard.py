@@ -8,5 +8,8 @@ __author__ = 'Zhu XiaoLong'
 import pyperclip
 
 class ClipBorad(object):
-    def read_clipboard_data(self):
+    def read_clipboard(self):
         return [pyperclip.paste()]
+
+    def write_clipboard(self, value):
+        pyperclip.copy(value)
