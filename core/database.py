@@ -17,7 +17,6 @@ class DataBase(object):
         cursor = self.__conn.cursor()
         cursor.execute('''SELECT * FROM clibor_history order by id desc limit (?) ''', (limit,))
         rows = cursor.fetchall()
-        self.__conn.commit()
         cursor.close()
         res_tuple_list = []
         for row in rows:
@@ -38,7 +37,6 @@ class DataBase(object):
         cursor = self.__conn.cursor()
         cursor.execute('''SELECT * FROM clibor_fixed_value order by id asc limit (?)''', (limit,))
         rows = cursor.fetchall()
-        self.__conn.commit()
         cursor.close()
         res_tuple_list = []
         for row in rows:
@@ -50,9 +48,24 @@ class DataBase(object):
         cursor = self.__conn.cursor()
         cursor.execute('''SELECT value FROM clibor_history where id = (?)''', (id,))
         value = cursor.fetchall()
-        self.__conn.commit()
         cursor.close()
         return value[0][0].decode('utf-8')
+    
+    def save_clipboard_data_to_fixed(self, id):
+        cursor = self.__conn.cursor()
+        cursor.execute('''SELECT value FROM clibor_history where id = (?)''', (id,))
+        value = cursor.fetchall()
+        cursor.execute('''INSERT INTO clibor_fixed_value (value) values(?) ''', (value[0][0],))
+        id = cursor.lastrowid
+        self.__conn.commit()
+        cursor.close()
+        return id
+    
+    def delete_from_fixed_by_id(self, id):
+        cursor = self.__conn.cursor()
+        cursor.execute('''DELETE FROM clibor_fixed_value where id = (?)''', (id,))
+        self.__conn.commit()
+        cursor.close()
     
     def trim_value(self, value):
         val = repr(value)
