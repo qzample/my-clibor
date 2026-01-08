@@ -24,9 +24,10 @@ class DataBase(object):
             res_tuple_list.append(res_tuple)
         return res_tuple_list
     
-    def write_clipboard_data(self, value):
+    def write_clipboard_data(self, value, limit):
         cursor = self.__conn.cursor()
         binary_data = value.encode('utf-8')
+        cursor.execute('''DELETE FROM clibor_history WHERE ID NOT IN (SELECT ID FROM clibor_history ORDER BY ID desc limit (?))''', (limit,))
         cursor.execute('''INSERT INTO clibor_history (value) values(?)''', (binary_data,))
         id = cursor.lastrowid
         self.__conn.commit()

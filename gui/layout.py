@@ -68,7 +68,7 @@ class MyClibor(object):
         clipboard_data = self.__db.read_clipboard_data(self.__limit)
         if len(clipboard_data) == 0 and len(self.__clipboard_data) != 0:
             for item in self.__clipboard_data:
-                self.__db.write_clipboard_data(item)
+                self.__db.write_clipboard_data(item, self.__limit)
         clipboard_data = self.__db.read_clipboard_data(self.__limit)
         self.__clipboard_data = deque(clipboard_data)
 
@@ -204,7 +204,7 @@ class MyClibor(object):
         if self.__last_copied_val and len(self.__last_copied_val) == len(value) and self.__last_copied_val == value:
             return
         self.__last_copied_val = value
-        self.__db.write_clipboard_data(value)
+        self.__db.write_clipboard_data(value, self.__limit)
         while len(self.__clipboard_data) > 20:
             self.__clipboard_data.popleft()
         self.__clipboard_data.clear()
