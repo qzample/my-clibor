@@ -24,4 +24,5 @@
 
 ### 打包命令
 pip install -r requirements.txt
+
 pyinstaller --onefile --name MyClibor --noconsole --icon=./assets/bird.ico --add-data "./assets;assets" main.py
