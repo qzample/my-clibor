@@ -27,8 +27,8 @@ class DataBase(object):
     def write_clipboard_data(self, value, limit):
         cursor = self.__conn.cursor()
         binary_data = value.encode('utf-8')
-        cursor.execute('''DELETE FROM clibor_history WHERE ID NOT IN (SELECT ID FROM clibor_history ORDER BY ID desc limit (?))''', (limit,))
         cursor.execute('''INSERT INTO clibor_history (value) values(?)''', (binary_data,))
+        cursor.execute('''DELETE FROM clibor_history WHERE ID NOT IN (SELECT ID FROM clibor_history ORDER BY ID desc limit (?))''', (limit,))
         id = cursor.lastrowid
         self.__conn.commit()
         cursor.close()
@@ -52,11 +52,12 @@ class DataBase(object):
         cursor.close()
         return value[0][0].decode('utf-8')
     
-    def save_clipboard_data_to_fixed(self, id):
+    def save_clipboard_data_to_fixed(self, id, limit):
         cursor = self.__conn.cursor()
         cursor.execute('''SELECT value FROM clibor_history where id = (?)''', (id,))
         value = cursor.fetchall()
         cursor.execute('''INSERT INTO clibor_fixed_value (value) values(?) ''', (value[0][0],))
+        cursor.execute('''DELETE FROM clibor_fixed_value WHERE ID NOT IN (SELECT ID FROM clibor_fixed_value ORDER BY ID desc limit (?))''', (limit,))
         id = cursor.lastrowid
         self.__conn.commit()
         cursor.close()

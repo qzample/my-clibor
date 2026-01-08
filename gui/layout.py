@@ -167,7 +167,8 @@ class MyClibor(object):
         context_menu.post(event.x_root, event.y_root)
     
     def __save_to_fixed_phrase(self, id):
-        self.__db.save_clipboard_data_to_fixed(id)
+        self.__db.save_clipboard_data_to_fixed(id, self.__limit)
+        self.__fixed_data = self.__db.read_fixed_clipboard_data(self.__limit)
     
     def __delete_from_fixed_phrase(self, id):
         self.__db.delete_from_fixed_by_id(id)
