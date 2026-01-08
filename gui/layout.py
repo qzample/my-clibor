@@ -203,7 +203,7 @@ class MyClibor(object):
             event.widget['bg'] = self.__light_fixed_color if isfixed else self.__light_clipbor_color
     
     def __on_click_label(self, event, id, isfixed):
-        val = self.__db.read_blob_data_by_id(id)
+        val = self.__db.read_blob_data_by_id(id, isfixed)
         self.__clipboard.write_clipboard(val)
         if not isfixed:
             self.__last_copied_val = val

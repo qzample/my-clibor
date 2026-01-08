@@ -45,9 +45,9 @@ class DataBase(object):
             res_tuple_list.append(res_tuple)
         return res_tuple_list
     
-    def read_blob_data_by_id(self, id):
+    def read_blob_data_by_id(self, id, isfixed):
         cursor = self.__conn.cursor()
-        cursor.execute('''SELECT value FROM clibor_history where id = (?)''', (id,))
+        cursor.execute('''SELECT value FROM clibor_fixed_value where id = (?)''' if isfixed else '''SELECT value FROM clibor_history where id = (?)''', (id,))
         value = cursor.fetchall()
         cursor.close()
         return value[0][0].decode('utf-8')
