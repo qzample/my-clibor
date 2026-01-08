@@ -21,3 +21,7 @@
 ### 托盘菜单
 <img width="149" height="77" alt="image" src="https://github.com/user-attachments/assets/d8cd2582-aa58-4729-a777-266d21cad726" />
 
+
+### 打包命令
+pip install -r requirements.txt
+pyinstaller --onefile --name MyClibor --noconsole --icon=./assets/bird.ico --add-data "./assets;assets" main.py
