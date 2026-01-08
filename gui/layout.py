@@ -15,7 +15,7 @@ from pystray import Icon, MenuItem, Menu
 import keyboard
 from PIL import Image
 import threading
-import time
+import time,sys,os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,7 +36,6 @@ class MyClibor(object):
     __light_fixed_color="#94F58B"
     __dark_fixed_color="#57D34C"
     __deeper_fixed_color="#278A1F"
-    __tray_icon = Image.open("./assets/bird.ico").resize((64, 64))
 
     __ctrl_count = 0
     __last_ctrl_time = 0
@@ -72,15 +71,23 @@ class MyClibor(object):
         clipboard_data = self.__db.read_clipboard_data(self.__limit)
         self.__clipboard_data = deque(clipboard_data)
 
+    def __resource_path(self, relative_path):
+        """获取资源文件路径"""
+        if hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)
+
     def __init_window(self):
         '''
         init window by tkinter
 
         :param self: Description
         '''
+        bird_ico_path = self.__resource_path('assets/bird.ico')
+        self.__tray_icon = Image.open(bird_ico_path).resize((64, 64))
         root = tk.Tk()
         root.title('MyClibor')
-        root.iconbitmap('./assets/bird.ico')
+        root.iconbitmap(bird_ico_path)
         root.geometry(f'{self.__width}x{self.__height}-50-50')
         root.resizable(False, False)
         root.configure(bg='#ADD8E6')
