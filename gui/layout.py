@@ -15,7 +15,7 @@ from pystray import Icon, MenuItem, Menu
 import keyboard
 from PIL import Image
 import threading
-import time,sys,os
+import time,sys,os,win32gui,win32con
 
 logging.basicConfig(
     level=logging.INFO,
@@ -86,11 +86,15 @@ class MyClibor(object):
         bird_ico_path = self.__resource_path('assets/bird.ico')
         self.__tray_icon = Image.open(bird_ico_path).resize((64, 64))
         root = tk.Tk()
+        # 默认隐藏到托盘
+        root.withdraw()
         root.title('MyClibor')
         root.iconbitmap(bird_ico_path)
         root.geometry(f'{self.__width}x{self.__height}-50-50')
         root.resizable(False, False)
         root.configure(bg='#ADD8E6')
+        root.attributes("-topmost", True)
+        root.bind("<FocusOut>", lambda event: self.__hide_window(event.widget))
         root.columnconfigure(0, weight=1)
         root.columnconfigure(1, weight=1)
         root.rowconfigure(0, weight=0, minsize=30)
@@ -102,6 +106,22 @@ class MyClibor(object):
         # self.__setup_hotkey(root)
         self.__icon = self.__setup_tray(root)
         self.__root = root
+
+    def __paste_to_other_app(self):
+        windows = []
+        def callback(hwnd, extra):
+            # 检查窗口是否可见
+            if win32gui.IsWindowVisible(hwnd) and win32gui.GetWindowText(hwnd):
+                windows.append(hwnd)
+        win32gui.EnumWindows(callback, None)
+        current_window = win32gui.GetForegroundWindow()
+        current_window_index = windows.index(current_window)
+        if len(windows) <= 1:
+            return
+        previous_window = windows[current_window_index + 1]
+        win32gui.ShowWindow(previous_window, win32con.SW_SHOW)
+        win32gui.SetForegroundWindow(previous_window)
+        keyboard.press_and_release("ctrl+v")
 
     def __setup_tray(self, root):
         menu = Menu(
@@ -207,6 +227,7 @@ class MyClibor(object):
         self.__clipboard.write_clipboard(val)
         if not isfixed:
             self.__last_copied_val = val
+        self.__paste_to_other_app()
     
     def __on_text(self, value):
         if self.__last_copied_val and len(self.__last_copied_val) == len(value) and self.__last_copied_val == value:
