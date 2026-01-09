@@ -244,7 +244,8 @@ class MyClibor(object):
         finally:
             self.__start_listen_clipboard()
             # 监听快捷键，连续按下三次ctrl需要自己写逻辑实现
-            keyboard.on_press_key("ctrl", lambda _: self.__on_ctrl_key())
+            # 这里监听on_release_key而不是on_press_key，是因为持续按住crtl也会触发
+            keyboard.on_release_key("ctrl", lambda _: self.__on_ctrl_key())
             # icon.run是阻塞的，需要单独开个线程
             # 为什么不使用run_detached()，因为执行stop后只是停止了循环，线程还在
             threading.Thread(target=self.__icon.run, daemon=True).start()
